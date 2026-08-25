@@ -1,0 +1,3 @@
+- insert:
+    - id: quick-commands
+      name: '@fonlan/dsh-quick-commands'

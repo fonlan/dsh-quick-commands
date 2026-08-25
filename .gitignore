@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Build output
+lib/
+*.tsbuildinfo
+*.tsbuildinfo.json
+
+# gitmemo long-term memory (nested git repo — keep out of the workspace repo)
+.mem/
+
+# Packaging
+*.tgz
+*.tar.gz
+*.zip
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*~
+
+AGENTS.md
+.mem/
