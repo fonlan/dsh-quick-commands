@@ -271,6 +271,12 @@ function RunPopup(props: {
   }
 
   const close = (): void => {
+    // Already exited: there is nothing left to terminate, close directly
+    // instead of asking "terminate this command?".
+    if (state.status === 'exited') {
+      onClose()
+      return
+    }
     setKillConfirm(true)
   }
 
