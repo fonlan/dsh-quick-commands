@@ -466,3 +466,24 @@
 .qc-settings-add-btn:hover {
   background: color-mix(in srgb, var(--dsw-alias-label-primary, #f2f2f2) 10%, transparent);
 }
+
+/* ── mobile fallback (dsh-mobile-nav) ──────────────────────────────────────
+   The dsh-mobile-nav plugin (≤1023px) hides the ENTIRE header utilities seat
+   with `[data-mobile-nav="frame"] [data-phase] header > :first-child >
+   :last-child { display: none !important; }`, because the seat used to hold
+   only the session-log-export capsule (which it relocates to the drawer
+   footer). Our ⚡ button rides that same seat, so it vanished on phones.
+
+   Re-show ONLY our button: restore the seat's flex layout (out-ranking the
+   host rule via `:has(.qc-head-wrap)` specificity (0,5,1) > (0,4,1)) and keep
+   every other seat occupant hidden (the session-log capsule stays relocated
+   to the drawer footer). Desktop (no [data-mobile-nav]) is untouched. */
+[data-mobile-nav="frame"] [data-phase] header > :first-child > :last-child:has(.qc-head-wrap) {
+  display: flex !important;
+  margin-left: 4px !important;
+  gap: 0 !important;
+}
+[data-mobile-nav="frame"] [data-phase] header > :first-child > :last-child:has(.qc-head-wrap)
+  [data-slot="conversation.session.header.utilities"] > :not(.qc-head-wrap) {
+  display: none !important;
+}
