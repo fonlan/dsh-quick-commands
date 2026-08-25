@@ -67,6 +67,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
   const popover = useRunPopover()
   const [commands, setCommands] = useState<Array<{ name: string; command: string }>>([])
   const [menuLoadError, setMenuLoadError] = useState<string | null>(null)
+  const [menuRemoteHost, setMenuRemoteHost] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [anchor, setAnchor] = useState<'corner' | 'button'>('corner')
   const wrapRef = useRef<HTMLDivElement | null>(null)
@@ -97,6 +98,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
         if (cancelled) return
         const own = entries.find((e) => e.workspaceId === workspace?.workspaceId)
         setCommands(own === undefined ? [] : own.commands)
+        setMenuRemoteHost(own?.remoteHost ?? null)
         setAnchor(settings.popupAnchor)
         setMenuLoadError(null)
       } catch (e) {
@@ -113,7 +115,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
     closeMenu()
     try {
       const run = await quickApi.runStart(workspace!.workspaceId, commandName, cwd ?? workspace!.path)
-      openRun(run.runId, workspace!.workspaceId, run.commandName)
+      openRun(run.runId, run.workspaceId, run.commandName, run.remoteHost)
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e)
       if (message.includes('run-busy') || message.includes('already running')) {
@@ -144,6 +146,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
         <div className="qc-menu" role="menu">
           <div className="qc-menu-head">
             <span className="qc-menu-title">{t('menuTitle')}</span>
+            {menuRemoteHost !== null && <span className="qc-menu-remote" title={`SSH · ${menuRemoteHost}`}>SSH</span>}
             <span className="qc-menu-ws">{workspace.title}</span>
             <button type="button" className="qc-menu-close" aria-label={t('runClose')} onClick={closeMenu}>
               <IconCloseOutline16 size={12} />
@@ -173,6 +176,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
           runId={popover.runId}
           workspaceId={popover.workspaceId ?? ''}
           commandName={popover.commandName ?? ''}
+          remoteHost={popover.remoteHost ?? undefined}
           t={t}
           anchor={anchor}
           sessionId={sessionId}
@@ -188,12 +192,13 @@ function RunPopup(props: {
   runId: string
   workspaceId: string
   commandName: string
+  remoteHost?: string
   t: (key: string) => string
   anchor: 'corner' | 'button'
   sessionId: string
   onClose: () => void
 }): JSX.Element {
-  const { runId, t, anchor, onClose } = props
+  const { runId, t, anchor, remoteHost, onClose } = props
   const [state, setState] = useState(() => ({
     status: 'running' as 'running' | 'exited',
     exitCode: null as number | null,
@@ -291,6 +296,7 @@ function RunPopup(props: {
     <div className={`qc-popup qc-popup-${anchor}`} role="dialog" aria-label={title}>
       <header className="qc-popup-head">
         <span className="qc-popup-title" title={title}>{title}</span>
+        {remoteHost !== undefined && <span className="qc-popup-remote" title={`SSH · ${remoteHost}`}>SSH</span>}
         <span className="qc-popup-cmd">{props.commandName}</span>
         <button
           type="button"

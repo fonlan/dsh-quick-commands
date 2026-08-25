@@ -47,6 +47,8 @@ export interface QuickRunView {
   commandName: string
   /** Command line after placeholder substitution (display only). */
   resolvedCommand: string
+  /** Non-empty when the command executes over SSH on a remote workspace host. */
+  remoteHost?: string
   status: 'running' | 'exited'
   exitCode: number | null
   signal: string | null
@@ -76,5 +78,7 @@ export interface QuickRosterEntry {
   workspaceId: string
   path: string
   title: string
+  /** SSH host id when the workspace runs remotely through dsh-ssh (else absent). */
+  remoteHost?: string
   commands: QuickCommandEntry[]
 }

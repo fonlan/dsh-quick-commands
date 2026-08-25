@@ -22,6 +22,8 @@ export interface RunPopoverState {
   workspaceId: string | null
   /** Command display name. */
   commandName: string | null
+  /** SSH host id when the run executes on a remote workspace (else null). */
+  remoteHost: string | null
   /** Whether the run popup should stream (false while minimized). */
   streaming: boolean
 }
@@ -46,6 +48,7 @@ function getState(): QuickCommandsState {
         runId: null,
         workspaceId: null,
         commandName: null,
+        remoteHost: null,
         streaming: true,
         listeners: new Set(),
       },
@@ -55,6 +58,7 @@ function getState(): QuickCommandsState {
         runId: null,
         workspaceId: null,
         commandName: null,
+        remoteHost: null,
         streaming: true,
       },
     }
@@ -90,6 +94,7 @@ function snapshot(): RunPopoverState {
     runId: p.runId,
     workspaceId: p.workspaceId,
     commandName: p.commandName,
+    remoteHost: p.remoteHost,
     streaming: p.streaming,
   }
   return state.snapshot
@@ -111,10 +116,10 @@ export function openMenu(): void { patch({ menuOpen: true }) }
 export function closeMenu(): void { patch({ menuOpen: false }) }
 export function toggleMenu(open: boolean): void { patch({ menuOpen: open }) }
 
-export function openRun(runId: string, workspaceId: string, commandName: string): void {
-  patch({ runId, workspaceId, commandName, menuOpen: false, streaming: true })
+export function openRun(runId: string, workspaceId: string, commandName: string, remoteHost?: string): void {
+  patch({ runId, workspaceId, commandName, remoteHost: remoteHost ?? null, menuOpen: false, streaming: true })
 }
 
 export function closeRun(): void {
-  patch({ runId: null, workspaceId: null, commandName: null, streaming: false })
+  patch({ runId: null, workspaceId: null, commandName: null, remoteHost: null, streaming: false })
 }

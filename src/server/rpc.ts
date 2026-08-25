@@ -19,6 +19,7 @@ import type {} from '@deepseek-ai/dsh-host-webserver'
 import type { QuickCommandsSettingsFace } from './settings.js'
 import type { QuickRunner } from './runner.js'
 import type { ApiEnvelope, QuickRosterEntry, QuickRunView } from '../shared/contract.js'
+import { localPathToRemoteRef } from './remote.js'
 
 const API_PREFIX = '/plugins/@fonlan/dsh-quick-commands/api'
 
@@ -119,10 +120,12 @@ export function registerApiRoutes(ctx: Context, runner: QuickRunner, settings: Q
     if (svc !== undefined) {
       for (const ws of svc.list()) {
         const set = config.workspaces.find((w) => w.workspaceId === ws.id)
+        const ref = localPathToRemoteRef(ws.path)
         entries.push({
           workspaceId: ws.id,
           path: ws.path,
           title: ws.title,
+          ...(ref !== null ? { remoteHost: ref.hostId } : {}),
           commands: set === undefined ? [] : set.commands,
         })
       }
@@ -182,7 +185,7 @@ export function registerApiRoutes(ctx: Context, runner: QuickRunner, settings: Q
         if (entry.name.trim() === '' || entry.command.trim() === '') {
           throw { code: 'command-empty', message: `command ${commandName} has an empty name or body`, status: 400 }
         }
-        const result = runner.start({
+        const result = await runner.start({
           workspaceId,
           workspacePath: ws.path,
           workspaceTitle: ws.title,
@@ -200,7 +203,8 @@ export function registerApiRoutes(ctx: Context, runner: QuickRunner, settings: Q
           runId: result.runId,
           workspaceId,
           commandName: entry.name,
-          resolvedCommand: entry.command,
+          resolvedCommand: result.resolvedCommand,
+          ...(result.remoteHost !== undefined ? { remoteHost: result.remoteHost } : {}),
           status: view.status,
           exitCode: view.exitCode,
           signal: view.signal,

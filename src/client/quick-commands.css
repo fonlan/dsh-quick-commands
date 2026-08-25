@@ -74,6 +74,17 @@
   text-align: right;
   margin-right: 2px;
 }
+.qc-menu-remote {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 5px;
+  color: var(--dsw-alias-fg-on-accent, #fff);
+  background: var(--dsw-alias-accent, #4a8dff);
+  letter-spacing: 0.04em;
+}
 .qc-menu-close {
   border: 0;
   background: transparent;
@@ -177,6 +188,17 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 40%;
+}
+.qc-popup-remote {
+  flex: 0 0 auto;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: var(--dsw-alias-fg-on-accent, #fff);
+  background: var(--dsw-alias-accent, #4a8dff);
+  letter-spacing: 0.04em;
 }
 .qc-popup-icon {
   border: 0;
