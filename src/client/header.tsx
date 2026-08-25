@@ -69,6 +69,23 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
   const [menuLoadError, setMenuLoadError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [anchor, setAnchor] = useState<'corner' | 'button'>('corner')
+  const wrapRef = useRef<HTMLDivElement | null>(null)
+
+  // Click-outside dismissal: while the menu is open, a pointerdown on the
+  // document that lands OUTSIDE the wrap (button / menu / run popup all live
+  // inside the wrap) collapses the menu. pointerdown (not click) covers mouse,
+  // touch and pen, and fires before the button's own click toggle.
+  useEffect(() => {
+    if (!popover.menuOpen) return
+    const onPointerDown = (e: PointerEvent): void => {
+      const wrap = wrapRef.current
+      if (wrap === null) return
+      if (e.target instanceof Node && wrap.contains(e.target)) return
+      closeMenu()
+    }
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => { document.removeEventListener('pointerdown', onPointerDown) }
+  }, [popover.menuOpen])
 
   // Load the workspace's command list + anchor when the menu opens.
   useEffect(() => {
@@ -111,7 +128,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
   }
 
   return (
-    <div className="qc-head-wrap">
+    <div ref={wrapRef} className="qc-head-wrap">
       <button
         type="button"
         className="qc-head-btn"
