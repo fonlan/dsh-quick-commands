@@ -1,7 +1,7 @@
 # @fonlan/dsh-quick-commands
 
 DSH web plugin: per-workspace quick commands. Configure named shell commands per DSH
-workspace; run one from the session header (the ⚡ icon left of the Session log pill)
+workspace; run one from the session header (the ▶ quick-run icon left of the Session log pill)
 and watch its stdout/stderr live in a floating popup.
 
 ## Features

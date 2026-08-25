@@ -1,5 +1,5 @@
 /**
- * Session-header quick-command surface: the ⚡ icon button (left of the
+ * Session-header quick-command surface: the ▶ play icon button (left of the
  * Session log pill), the command menu popover (current workspace's commands),
  * and the live output popup that streams stdout/stderr at ~200ms cadence.
  *
@@ -8,7 +8,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import {
-  IconCodeOutline16,
+  IconPlayOutline16,
   IconCloseOutline16,
   IconStopFill16,
 } from '@deepseek-ai/dsh-client-ui-primitives'
@@ -120,7 +120,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
         disabled={workspace === undefined}
         onClick={() => { popover.menuOpen ? closeMenu() : openMenu() }}
       >
-        <IconCodeOutline16 size={16} />
+        <IconPlayOutline16 size={16} />
       </button>
 
       {popover.menuOpen && workspace !== undefined && (

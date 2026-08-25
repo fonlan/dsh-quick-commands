@@ -5,8 +5,8 @@
  *  - `settings.plugin.item` card (keyed by the `quick-commands` settings
  *    namespace) — per-workspace command CRUD + popup anchor preference.
  *  - `conversation.session.header.utilities` entry (id `quick-commands`,
- *    order -1 → left of the Session log pill) — the ⚡ button, command menu,
- *    and live output popup.
+ *    order -1 → left of the Session log pill) — the quick-run ▶ button, command
+ *    menu, and live output popup.
  */
 import type { ClientContext } from '@deepseek-ai/dsh-client-runtime/client'
 import type {} from '@deepseek-ai/dsh-client-locale/client'
