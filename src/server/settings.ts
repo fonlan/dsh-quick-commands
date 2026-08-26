@@ -7,7 +7,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
 import { settingsNamespace } from '@deepseek-ai/dsh-settings'
-import type { QuickCommandsSettings, QuickCommandEntry, WorkspaceCommands } from '../shared/contract.js'
+import type { QuickCommandsSettings, QuickCommandEntry, QuickPopupSize, WorkspaceCommands } from '../shared/contract.js'
 
 export const QUICK_COMMANDS_NS = settingsNamespace('quick-commands')
 
@@ -30,6 +30,13 @@ const WorkspaceCommandsSchema = z.object({
 export const QuickCommandsSettingsSchema: z<QuickCommandsSettings> = z.object({
   workspaces: z.array(WorkspaceCommandsSchema).max(500),
   popupAnchor: z.union([z.const('corner'), z.const('button')]).default('corner'),
+  // No default on purpose: a missing popupSize stays ABSENT in the resolved
+  // document, so the client can distinguish "never resized" (per-anchor
+  // default size) from a user-chosen size.
+  popupSize: z.object({
+    width: z.number().min(320).max(8192),
+    height: z.number().min(200).max(8192),
+  }),
 })
 
 const DEFAULT_SETTINGS: QuickCommandsSettings = {
@@ -53,6 +60,8 @@ export interface QuickCommandsSettingsFace {
   setCommands(workspaceId: string, commands: QuickCommandEntry[]): Promise<void>
   /** Set the popup anchor preference. */
   setAnchor(anchor: QuickCommandsSettings['popupAnchor']): Promise<void>
+  /** Persist the output popup size (drag-resize). */
+  setPopupSize(size: QuickPopupSize): Promise<void>
 }
 
 export function registerSettings(ctx: Context): QuickCommandsSettingsFace {
@@ -89,6 +98,9 @@ export function registerSettings(ctx: Context): QuickCommandsSettingsFace {
     },
     setAnchor: async (anchor) => {
       await persist({ popupAnchor: anchor })
+    },
+    setPopupSize: async (size) => {
+      await persist({ popupSize: size })
     },
   }
 }

@@ -6,6 +6,7 @@
 import type {
   ApiEnvelope,
   QuickCommandsSettings,
+  QuickPopupSize,
   QuickRosterEntry,
   QuickRunView,
 } from '../shared/contract'
@@ -62,6 +63,8 @@ export const quickApi = {
     call<QuickCommandsSettings>('settings.setCommands', { workspaceId, commands }),
   settingsSetAnchor: (anchor: QuickCommandsSettings['popupAnchor']) =>
     call<QuickCommandsSettings>('settings.setAnchor', { anchor }),
+  settingsSetPopupSize: (size: QuickPopupSize) =>
+    call<QuickCommandsSettings>('settings.setPopupSize', { width: size.width, height: size.height }),
   workspacesList: () => call<QuickRosterEntry[]>('workspaces.list'),
   runStart: (workspaceId: string, commandName: string, sessionCwd: string) =>
     call<QuickRunView>('run.start', { workspaceId, commandName, sessionCwd }),

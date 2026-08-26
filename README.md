@@ -14,7 +14,10 @@ and watch its stdout/stderr live in a floating popup.
   included). Click a command → run it in the workspace directory.
 - **Live output popup**: streams stdout/stderr at ~200 ms cadence, split tabs,
   raw text, auto-follow with manual-scroll pause; tree-scoped termination on
-  kill/close; serial per workspace (one run at a time per workspace).
+  kill/close; serial per workspace (one run at a time per workspace). Drag the
+  left border (width) and the top/bottom border (height), or the free-corner
+  grip, to resize; the size is remembered across runs and sessions (persisted
+  in the plugin settings).
 - **Remote (SSH) workspaces**: when the workspace is a `@dsh-ssh/dsh-ssh`
   remote workspace (its path is the local placeholder under
   `~/.dsh/remote/<hostId>/...`), quick commands stream over SSH on the remote
@@ -35,7 +38,8 @@ The plugin settings namespace is `quick-commands`:
       { "name": "test", "command": "npm test" }
     ]}
   ],
-  "popupAnchor": "corner" // or "button"
+  "popupAnchor": "corner", // or "button"
+  "popupSize": { "width": 520, "height": 340 } // optional, written when the user drags the popup's resize grip
 }
 ```
 

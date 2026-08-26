@@ -22,12 +22,20 @@ export interface WorkspaceCommands {
   commands: QuickCommandEntry[]
 }
 
+/** Output popup dimensions in CSS pixels (user drag-resize state). */
+export interface QuickPopupSize {
+  width: number
+  height: number
+}
+
 /** Full user-facing plugin settings document (settings namespace value). */
 export interface QuickCommandsSettings {
   /** Command sets; a workspace may be absent (no commands configured). */
   workspaces: WorkspaceCommands[]
   /** Output popup anchor preference: fixed bottom-right or anchored at the button. */
   popupAnchor: 'corner' | 'button'
+  /** Output popup size; absent until the user drags the resize handle (then per-anchor defaults apply). */
+  popupSize?: QuickPopupSize
 }
 
 /** Placeholder substitution values resolved for one execution. */

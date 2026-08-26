@@ -7,6 +7,7 @@
  *   settings.get          → QuickCommandsSettings
  *   settings.setCommands  → { workspaceId, commands } → QuickCommandsSettings
  *   settings.setAnchor    → { anchor } → QuickCommandsSettings
+ *   settings.setPopupSize → { width, height } → QuickCommandsSettings
  *   workspaces.list       → QuickRosterEntry[] (DSH workspaces × command sets)
  *   run.start             → { workspaceId, commandName, sessionCwd } → QuickRunView
  *   run.poll              → { runId, stdoutFrom, stderrFrom } → RunPollResult
@@ -164,6 +165,19 @@ export function registerApiRoutes(ctx: Context, runner: QuickRunner, settings: Q
         const anchor = body.anchor
         if (anchor !== 'corner' && anchor !== 'button') throw new Error('anchor must be corner or button')
         await settings.setAnchor(anchor)
+        return settings.get()
+      }
+      case 'settings.setPopupSize': {
+        const width = body.width
+        const height = body.height
+        // Number.isFinite guards NaN, which slips past schemastery's range checks.
+        if (typeof width !== 'number' || !Number.isFinite(width) || width < 320 || width > 8192) {
+          throw new Error('width must be a number between 320 and 8192')
+        }
+        if (typeof height !== 'number' || !Number.isFinite(height) || height < 200 || height > 8192) {
+          throw new Error('height must be a number between 200 and 8192')
+        }
+        await settings.setPopupSize({ width: Math.round(width), height: Math.round(height) })
         return settings.get()
       }
       case 'workspaces.list': {
