@@ -1,0 +1,78 @@
+# =============================================================================
+# Publish · npm 发布工作流 (@fonlan/dsh-quick-commands)
+#
+# 触发方式: 推送形如 `v*` 的 tag (例如 v0.1.0) 即自动发布。
+#           tag 版本必须与 package.json 的 version 完全一致, 否则失败。
+#           建议用 `npm run release:patch` (自动 bump + push + 打 tag)。
+#
+# 需要的 Repo Secret: `NPM_TOKEN`
+#   - 到 npmjs.com 创建 Access Token (具备对 @fonlan scope 的 publish 权限):
+#       * Granular Access Token: 勾选对 `@fonlan` scope 的 "Read and write"
+#         权限 (推荐, 最小权限); 或
+#       * Classic Token: 需具备 publish 权限。
+#   - 在仓库 Settings -> Secrets and variables -> Actions 添加 `NPM_TOKEN`。
+#   - package.json 已有 publishConfig.access=public, scope 包无需 --access。
+# =============================================================================
+
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # tag 版本必须与 package.json 的 version 一致, 否则失败阻止发布。
+      - name: Verify tag matches package.json version
+        run: |
+          pkg="$(node -p "require('./package.json').version")"
+          tag="${GITHUB_REF_NAME#v}"
+          echo "package.json version: $pkg"
+          echo "tag version:          $tag"
+          if [ "$pkg" != "$tag" ]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match package.json version $pkg — bump the version first (npm run release:patch && git push --tags)"
+            exit 1
+          fi
+
+      # pnpm 必须先于 setup-node: setup-node 的 cache: pnpm 需要 pnpm 已在 PATH。
+      # 版本来自 package.json 的 packageManager 字段 (pnpm@11.21.0);
+      # 同时在这里和 packageManager 里显式指定会使 action 报 ERR_PNPM_BAD_PM_VERSION。
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      # registry-url 指向 npmjs 是关键 —— setup-node 会据此把 NODE_AUTH_TOKEN
+      # 写入 $HOME/.npmrc 供 publish 使用。
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      # 显式构建 lib/ (tsc 声明 + tsdown 客户端 bundle), 保证发布产物是新鲜的;
+      # publish 时 prepare 还会再跑一次 build, 幂等无害。
+      - name: Build
+        run: pnpm build
+
+      # --no-git-checks: CI 检出是 detached HEAD, pnpm 的 git 校验会误报失败;
+      # (lib/ 已在 .gitignore, 构建不回污工作区)。
+      - name: Publish to npm
+        run: pnpm publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
