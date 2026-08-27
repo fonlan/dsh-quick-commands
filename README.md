@@ -4,6 +4,14 @@
 
 DSH Web 插件：按工作区（workspace）管理快捷命令。为每个 DSH 工作区配置命名 shell 命令，从会话头部（Session log 左侧的 ▶ 快捷运行图标）点击即可运行，stdout/stderr 在浮动弹窗中实时显示。
 
+## 界面预览
+
+![设置卡片：为每个工作区配置命令](./docs/screenshots/settings-card.png)
+
+![会话头部按钮与命令菜单](./docs/screenshots/header-menu.png)
+
+![实时输出弹窗](./docs/screenshots/popup.png)
+
 ## 安装
 
 需要已安装 DSH（DeepSeek Harness）。以下命令通过 `dsh plugin` 在目标 profile 目录中转发给 pnpm 执行；目标 profile 首次使用时会自动初始化，安装完成后插件（声明了 `dsh.bundle`）会自动加入该 profile 的 bundles 层，重启 DSH（`dsh web`）后生效。

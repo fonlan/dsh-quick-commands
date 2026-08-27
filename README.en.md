@@ -6,6 +6,14 @@ DSH web plugin: per-workspace quick commands. Configure named shell commands per
 workspace; run one from the session header (the ▶ quick-run icon left of the Session log pill)
 and watch its stdout/stderr live in a floating popup.
 
+## Screenshots
+
+![Settings card: configure commands per workspace](./docs/screenshots/settings-card.png)
+
+![Session header button and command menu](./docs/screenshots/header-menu.png)
+
+![Live output popup](./docs/screenshots/popup.png)
+
 ## Installation
 
 Requires DSH (DeepSeek Harness) to be installed. The commands below forward to pnpm
