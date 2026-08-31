@@ -6,10 +6,10 @@
  */
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
-import { settingsNamespace } from '@deepseek-ai/dsh-settings'
 import type { QuickCommandsSettings, QuickCommandEntry, QuickPopupSize, WorkspaceCommands } from '../shared/contract.js'
+import type {} from '@deepseek-ai/dsh-settings'
 
-export const QUICK_COMMANDS_NS = settingsNamespace('quick-commands')
+export const QUICK_COMMANDS_NS = 'quick-commands'
 
 /**
  * One command entry schema. name/command may be EMPTY: the settings card edits
