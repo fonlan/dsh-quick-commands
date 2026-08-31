@@ -1,6 +1,6 @@
 {
   "name": "@fonlan/dsh-quick-commands",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "DSH web plugin: per-workspace quick commands. Configure named shell commands per DSH workspace, run one from the session header with live stdout/stderr in a floating popup.",
   "license": "MIT",
   "repository": {
