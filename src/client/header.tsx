@@ -142,7 +142,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
         disabled={workspace === undefined}
         onClick={() => { popover.menuOpen ? closeMenu() : openMenu() }}
       >
-        <IconPlayOutline16 size={16} />
+        <IconPlayOutline16 size={15} />
       </button>
 
       {popover.menuOpen && workspace !== undefined && (

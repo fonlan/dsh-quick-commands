@@ -11,21 +11,24 @@
   display: inline-flex;
   align-items: center;
 }
+/* Sized to DSH built-in header buttons (e.g. the open-in-app split button on
+   the left): 26px tall pill, 13px radius, hairline border-l4, hover uses the
+   shared --dsw-alias-interactive-bg-hover token. */
 .qc-head-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--dsw-alias-border-l2, rgba(128, 128, 128, 0.35));
-  border-radius: 18px;
+  width: 26px;
+  height: 26px;
+  border: 0.5px solid var(--dsw-alias-border-l4, rgba(128, 128, 128, 0.35));
+  border-radius: 13px;
   background: transparent;
   color: var(--dsw-alias-label-primary, #f2f2f2);
   cursor: pointer;
   padding: 0;
 }
 .qc-head-btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--dsw-alias-label-primary, #f2f2f2) 10%, transparent);
+  background: var(--dsw-alias-interactive-bg-hover, color-mix(in srgb, var(--dsw-alias-label-primary, #f2f2f2) 10%, transparent));
 }
 .qc-head-btn:disabled {
   color: var(--dsw-alias-label-dimmed, #666);
