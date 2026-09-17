@@ -581,3 +581,28 @@
   [data-slot="conversation.session.header.utilities"] > :not(.qc-head-wrap) {
   display: none !important;
 }
+
+/* ── viewport-level command menu ─────────────────────────────────────────
+   The phone shell's nav rail creates a sibling stacking context and its
+   center column can clip header descendants. The React menu therefore mounts
+   in document.body; these styles deliberately detach it from that header
+   context. Pixel coordinates (including the 56px rail exclusion) are set by
+   positionMenu() in header.tsx. */
+.qc-menu-portal {
+  position: fixed;
+  right: auto;
+  z-index: 1100;
+  box-sizing: border-box;
+  max-height: min(420px, calc(100dvh - 72px));
+}
+
+@media (max-width: 767px) {
+  /* A 44px target lets a fingertip reliably activate both the stop and close
+     buttons without changing the desktop header density. */
+  body[data-dsh-mobile] .qc-popup-icon,
+  [data-mobile-nav="frame"] .qc-popup-icon {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+}

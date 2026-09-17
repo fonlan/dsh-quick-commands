@@ -6,7 +6,8 @@
  * Props are the standard session/global kit of `conversation.session.header.utilities`
  * plus this plugin's injected hooks (anchor preference + resolver).
  */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import {
   IconPlayOutline16,
   IconCloseOutline16,
@@ -34,6 +35,38 @@ interface HeaderProps {
   t: (key: string) => string
   useSessions?: (selector: (s: { byId: Record<string, SessionRow>; current?: string }) => unknown) => unknown
   useWorkspaces?: (selector: (s: { items: WorkspaceRow[] }) => unknown) => unknown
+}
+
+interface MenuPosition {
+  left: number
+  top: number
+  width: number
+}
+
+const PHONE_MENU_RAIL_WIDTH = 56
+const MENU_VIEWPORT_GAP = 12
+const MENU_PREFERRED_WIDTH = 280
+
+/**
+ * Position the portal menu beside its button without ever entering the phone
+ * nav rail. Calculating actual pixels (rather than only CSS max-width) also
+ * means it remains correct when the header itself sits in a clipped stacking
+ * context created by a shell/mobile plugin.
+ */
+function positionMenu(button: HTMLButtonElement): MenuPosition {
+  const rect = button.getBoundingClientRect()
+  const narrow = window.matchMedia('(max-width: 767px)').matches
+  const minLeft = narrow ? PHONE_MENU_RAIL_WIDTH + MENU_VIEWPORT_GAP : MENU_VIEWPORT_GAP
+  const availableWidth = Math.max(0, window.innerWidth - minLeft - MENU_VIEWPORT_GAP)
+  const width = Math.min(MENU_PREFERRED_WIDTH, availableWidth)
+  const maxLeft = Math.max(minLeft, window.innerWidth - MENU_VIEWPORT_GAP - width)
+  return {
+    // The old in-header popover used `right:12px`; retain that visual anchor
+    // but clamp its left edge to the usable side of the rail.
+    left: Math.max(minLeft, Math.min(rect.right - MENU_VIEWPORT_GAP - width, maxLeft)),
+    top: Math.min(rect.bottom + 6, Math.max(MENU_VIEWPORT_GAP, window.innerHeight - 72)),
+    width,
+  }
 }
 
 /** Longest-path workspace match for a cwd (subdirectory allowed). */
@@ -73,21 +106,46 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
   const [anchor, setAnchor] = useState<'corner' | 'button'>('corner')
   const [popupSize, setPopupSize] = useState<QuickPopupSize | undefined>(undefined)
   const wrapRef = useRef<HTMLDivElement | null>(null)
+  const buttonRef = useRef<HTMLButtonElement | null>(null)
+  const menuRef = useRef<HTMLDivElement | null>(null)
+  const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null)
 
-  // Click-outside dismissal: while the menu is open, a pointerdown on the
-  // document that lands OUTSIDE the wrap (button / menu / run popup all live
-  // inside the wrap) collapses the menu. pointerdown (not click) covers mouse,
-  // touch and pen, and fires before the button's own click toggle.
+  // Click-outside dismissal: the command menu is portaled to document.body so
+  // it escapes the mobile shell's clipped/z-indexed header context. Treat both
+  // its portal node and its original header wrap as inside targets.
   useEffect(() => {
     if (!popover.menuOpen) return
     const onPointerDown = (e: PointerEvent): void => {
       const wrap = wrapRef.current
-      if (wrap === null) return
-      if (e.target instanceof Node && wrap.contains(e.target)) return
+      const menu = menuRef.current
+      if (!(e.target instanceof Node)) return
+      if (wrap?.contains(e.target) || menu?.contains(e.target)) return
       closeMenu()
     }
     document.addEventListener('pointerdown', onPointerDown)
     return () => { document.removeEventListener('pointerdown', onPointerDown) }
+  }, [popover.menuOpen])
+
+  // Recalculate against the actual header button whenever the menu opens and
+  // whenever a viewport change moves it (rotation, browser chrome resize).
+  useLayoutEffect(() => {
+    if (!popover.menuOpen) {
+      setMenuPosition(null)
+      return
+    }
+    const update = (): void => {
+      const button = buttonRef.current
+      if (button !== null) setMenuPosition(positionMenu(button))
+    }
+    update()
+    window.addEventListener('resize', update)
+    window.addEventListener('scroll', update, true)
+    window.visualViewport?.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', update, true)
+      window.visualViewport?.removeEventListener('resize', update)
+    }
   }, [popover.menuOpen])
 
   // Load the workspace's command list + anchor when the menu opens.
@@ -135,6 +193,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
   return (
     <div ref={wrapRef} className="qc-head-wrap">
       <button
+        ref={buttonRef}
         type="button"
         className="qc-head-btn"
         title={workspace === undefined ? t('noWorkspace') : t('buttonTooltip')}
@@ -145,8 +204,13 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
         <IconPlayOutline16 size={15} />
       </button>
 
-      {popover.menuOpen && workspace !== undefined && (
-        <div className="qc-menu" role="menu">
+      {popover.menuOpen && workspace !== undefined && menuPosition !== null && createPortal(
+        <div
+          ref={menuRef}
+          className="qc-menu qc-menu-portal"
+          role="menu"
+          style={{ left: menuPosition.left, top: menuPosition.top, width: menuPosition.width }}
+        >
           <div className="qc-menu-head">
             <span className="qc-menu-title">{t('menuTitle')}</span>
             {menuRemoteHost !== null && <span className="qc-menu-remote" title={`SSH · ${menuRemoteHost}`}>SSH</span>}
@@ -172,7 +236,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
             </button>
           ))}
         </div>
-      )}
+      , document.body)}
 
       {popover.runId !== null && (
         <RunPopup
@@ -279,7 +343,6 @@ function RunPopup(props: {
   }))
   const [view, setView] = useState<'stdout' | 'stderr'>('stdout')
   const [autoFollow, setAutoFollow] = useState(true)
-  const [killConfirm, setKillConfirm] = useState(false)
   const [pollError, setPollError] = useState<string | null>(null)
   const [closing, setClosing] = useState(false)
   const outputRef = useRef<HTMLDivElement | null>(null)
@@ -342,18 +405,19 @@ function RunPopup(props: {
     }
   }
 
-  const close = (): void => {
-    // Already exited: there is nothing left to terminate, close directly
-    // instead of asking "terminate this command?".
-    if (state.status === 'exited') {
-      onClose()
-      return
-    }
-    setKillConfirm(true)
-  }
+  // Closing the output surface must not terminate a still-running command:
+  // the dedicated stop control owns that destructive action. In particular,
+  // an X in a compact touch header is expected to dismiss immediately rather
+  // than reveal a second confirmation row below the visible viewport.
+  const closeOutput = (): void => { onClose() }
 
-  const confirmClose = (): void => {
-    void kill()
+  // Some mobile webviews occasionally fail to synthesize `click` for compact
+  // header controls after a touch gesture. Handle touch pointer-up directly;
+  // click remains the keyboard and mouse activation path.
+  const onClosePointerUp = (e: React.PointerEvent<HTMLButtonElement>): void => {
+    if (e.pointerType !== 'touch') return
+    e.preventDefault()
+    closeOutput()
   }
 
   // ── drag-resize: pointer capture on the handles keeps moving/cancelling
@@ -438,21 +502,12 @@ function RunPopup(props: {
           className="qc-popup-icon qc-popup-close"
           title={t('runClose')}
           aria-label={t('runClose')}
-          onClick={close}
+          onPointerUp={onClosePointerUp}
+          onClick={closeOutput}
         >
           <IconCloseOutline16 size={14} />
         </button>
       </header>
-
-      {killConfirm && (
-        <div className="qc-popup-confirm">
-          <span>{t('runKillConfirm')}</span>
-          <button type="button" className="qc-popup-btn" onClick={confirmClose}>{t('runKill')}</button>
-          <button type="button" className="qc-popup-btn qc-popup-btn-plain" onClick={() => setKillConfirm(false)}>
-            {t('runClose')}
-          </button>
-        </div>
-      )}
 
       <div className="qc-popup-tabs">
         <button
