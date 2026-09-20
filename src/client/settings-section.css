@@ -1,0 +1,163 @@
+/**
+ * Styles for the quick-commands settings page.
+ *
+ * The page occupies the settings panel content column: a static header
+ * (title plus a one-line summary) over the always-visible command editor.
+ * Inner controls follow the built-in settings language.
+ */
+
+/* page layout */
+
+.qc-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 720px;
+}
+.qc-page-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.qc-page-title {
+  margin: 0;
+  color: var(--dsw-alias-label-primary, #f2f2f2);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.qc-page-sub {
+  margin: 0;
+  color: var(--dsw-alias-label-secondary, #cfd3d6);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* body: workspace / command-set editor */
+
+.qc-settings-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.qc-settings-intro {
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary, #cfd3d6);
+  margin: 0;
+  line-height: 1.5;
+}
+.qc-settings-anchor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+.qc-settings-anchor-label {
+  color: var(--dsw-alias-label-primary, #f2f2f2);
+  font-weight: 500;
+}
+.qc-settings-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--dsw-alias-label-secondary, #cfd3d6);
+  cursor: pointer;
+}
+.qc-settings-error {
+  font-size: 12px;
+  color: var(--dsw-alias-state-error-primary, #e5484d);
+}
+.qc-settings-empty {
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary, #cfd3d6);
+  margin: 0;
+}
+.qc-settings-workspace {
+  border: 1px solid var(--dsw-alias-border-l2, rgba(128, 128, 128, 0.35));
+  border-radius: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.qc-settings-workspace-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.qc-settings-workspace-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dsw-alias-label-primary, #f2f2f2);
+}
+.qc-settings-workspace-path {
+  font-size: 11px;
+  font-family: var(--dsw-font-family-mono, monospace);
+  color: var(--dsw-alias-label-tertiary, #adb2b8);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.qc-settings-no-commands {
+  font-size: 12px;
+  color: var(--dsw-alias-label-tertiary, #adb2b8);
+  margin: 0;
+}
+.qc-settings-command {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.qc-settings-field {
+  border: 1px solid var(--dsw-alias-border-l2, rgba(128, 128, 128, 0.35));
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1, #2a2a2d);
+  color: var(--dsw-alias-label-primary, #f2f2f2);
+  font-size: 12px;
+  padding: 6px 8px;
+  outline: none;
+}
+.qc-settings-field::placeholder {
+  color: var(--dsw-alias-label-tertiary, #adb2b8);
+}
+.qc-settings-field:focus {
+  border-color: var(--dsw-alias-brand-primary, #4a9eff);
+}
+.qc-settings-field-name {
+  width: 160px;
+  flex: none;
+}
+.qc-settings-field-command {
+  flex: 1;
+  font-family: var(--dsw-font-family-mono, monospace);
+}
+.qc-settings-icon-btn {
+  border: 0;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary, #adb2b8);
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+}
+.qc-settings-icon-btn:hover {
+  background: color-mix(in srgb, var(--dsw-alias-label-primary, #f2f2f2) 10%, transparent);
+  color: var(--dsw-alias-state-error-primary, #e5484d);
+}
+.qc-settings-add-btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--dsw-alias-border-l2, rgba(128, 128, 128, 0.35));
+  border-radius: 8px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary, #f2f2f2);
+  font-size: 12px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.qc-settings-add-btn:hover {
+  background: color-mix(in srgb, var(--dsw-alias-label-primary, #f2f2f2) 10%, transparent);
+}

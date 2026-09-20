@@ -37,10 +37,10 @@ export const zh = {
   runLost: '运行记录已失效',
   runNotFound: '工作区或命令未找到',
 
-  // settings card
+  // settings page (设置 → 侧栏「快捷命令」)
+  settingsTitle: '快捷命令',
   cardTitle: '快速命令',
-  cardDescription: '为每个工作区配置常用命令，会话头部一键运行',
-  collapseOrExpand: '展开 / 收起',
+  sectionSub: '为每个工作区配置常用命令，会话头部一键运行',
   cardIntro: '为每个工作区配置常用命令，运行于工作区目录。支持占位符：{workspace} 工作区路径，{cwd} 会话目录，{title} 工作区标题。',
   cardWorkspaces: '工作区',
   cardNoWorkspaces: '没有工作区。请在侧边栏先添加工作区。',
@@ -54,9 +54,9 @@ export const zh = {
   cardAnchor: '输出弹窗位置',
   cardAnchorCorner: '右下角',
   cardAnchorButton: '锚定按钮下方',
-}
+} as const
 
-export const en = {
+export const en: Record<keyof typeof zh, string> = {
   buttonTitle: 'Quick commands',
   buttonTooltip: 'Quick commands (current workspace)',
   noWorkspace: 'This session is not in any configured workspace',
@@ -87,9 +87,9 @@ export const en = {
   runLost: 'Run record expired',
   runNotFound: 'Workspace or command not found',
 
+  settingsTitle: 'Quick Commands',
   cardTitle: 'Quick commands',
-  cardDescription: 'Configure common commands per workspace, run them from the session header',
-  collapseOrExpand: 'Expand / collapse',
+  sectionSub: 'Configure common commands per workspace, run them from the session header',
   cardIntro: 'Configure common commands per workspace; they run in the workspace directory. Placeholders: {workspace} workspace path, {cwd} session cwd, {title} workspace title.',
   cardWorkspaces: 'Workspaces',
   cardNoWorkspaces: 'No workspaces. Add one in the sidebar first.',
