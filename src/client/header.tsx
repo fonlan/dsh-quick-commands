@@ -11,7 +11,7 @@ import { createPortal } from 'react-dom'
 import { PlayIcon, CloseIcon, StopIcon } from './icons'
 import { quickApi } from './api'
 import { useRunPopover, openMenu, closeMenu, openRun, closeRun } from './run-state'
-import type { QuickPopupSize } from '../shared/contract'
+import { anchorOf, type QuickPopupSize } from '../shared/contract'
 
 /** Workspace row shape the standard useWorkspaces hook exposes. */
 interface WorkspaceRow {
@@ -162,7 +162,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
         const own = entries.find((e) => e.workspaceId === workspace?.workspaceId)
         setCommands(own === undefined ? [] : own.commands)
         setMenuRemoteHost(own?.remoteHost ?? null)
-        setAnchor(settings.popupAnchor)
+        setAnchor(anchorOf(settings.popupAnchor))
         setPopupSize(settings.popupSize)
         setMenuLoadError(null)
       } catch (e) {

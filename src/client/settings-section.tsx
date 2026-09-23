@@ -11,7 +11,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { PlusIcon, TrashIcon } from './icons'
 import { quickApi } from './api'
-import type { QuickRosterEntry, QuickCommandsSettings } from '../shared/contract'
+import { anchorOf, type QuickRosterEntry, type QuickCommandsSettings } from '../shared/contract'
 import './settings-section.css'
 
 interface Props {
@@ -35,7 +35,7 @@ export function QuickCommandsSettingsSection({ t }: Props): JSX.Element {
   const load = async (): Promise<void> => {
     try {
       const [entries, settings] = await Promise.all([quickApi.workspacesList(), quickApi.settingsGet()])
-      setState({ loaded: true, entries, anchor: settings.popupAnchor })
+      setState({ loaded: true, entries, anchor: anchorOf(settings.popupAnchor) })
       setError(null)
     } catch (e) {
       setState((s) => ({ ...s, loaded: true }))
@@ -97,7 +97,7 @@ export function QuickCommandsSettingsSection({ t }: Props): JSX.Element {
     setState((s) => ({ ...s, anchor }))
     try {
       const next = await quickApi.settingsSetAnchor(anchor)
-      setState((s) => ({ ...s, anchor: next.popupAnchor }))
+      setState((s) => ({ ...s, anchor: anchorOf(next.popupAnchor) }))
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e))
       void load()

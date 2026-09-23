@@ -15,16 +15,23 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { QuickCommandRunner, type RemoteBackend } from './server/runner.js'
 import { readHostConfig } from './server/remote.js'
-import { registerSettings } from './server/settings.js'
+import { QuickCommandsSettingsSchema, registerSettings } from './server/settings.js'
 import { registerApiRoutes } from './server/rpc.js'
+import type { QuickCommandsSettings } from './shared/contract.js'
 
 export const name = '@fonlan/dsh-quick-commands'
 
 export const inject = ['settings']
 
-/** No plugin-level config; all configuration lives in the settings namespace. */
-export function apply(ctx: Context): void {
-  const settings = registerSettings(ctx)
+// The entry config IS this plugin's settings document (workspace command sets
+// + popup preferences). Its fields are declared volatile, so the settings
+// plane edits them without remounting the entry and `apply` receives live
+// handles rather than snapshots — see server/settings.ts for the reads.
+export const Config = QuickCommandsSettingsSchema
+
+/** Configuration rides the entry config; edits persist through the settings service. */
+export function apply(ctx: Context, config: QuickCommandsSettings): void {
+  const settings = registerSettings(ctx, config)
   const subprocess = ctx.get('subprocess')
   if (subprocess === undefined) {
     ctx.logger?.warn?.('@fonlan/dsh-quick-commands: subprocess service unavailable; commands cannot run')

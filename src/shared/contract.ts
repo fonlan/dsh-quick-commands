@@ -38,6 +38,16 @@ export interface QuickCommandsSettings {
   popupSize?: QuickPopupSize
 }
 
+/**
+ * The document's anchor as a usable literal. Wire data is defensive by
+ * contract: an older host can still answer with schemastery's empty-object
+ * resolution (`{}`) for this field, which must never reach a CSS class name or
+ * a radio `checked` comparison.
+ */
+export function anchorOf(value: unknown): 'corner' | 'button' {
+  return value === 'button' ? 'button' : 'corner'
+}
+
 /** Placeholder substitution values resolved for one execution. */
 export interface QuickRunPlaceholders {
   /** Workspace root path (also the execution cwd). */
