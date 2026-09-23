@@ -1,9 +1,9 @@
 /**
- * Remote-execution unit tests (node --test, TS strip-types).
+ * Remote-execution unit tests (node --test, TS transform-types).
  * Covers the pure placeholder-path detection, host-config reading, cwd
  * re-anchoring, and the RemoteStreamExecutor stream/kill semantics.
  *
- * Run: node --experimental-strip-types --test test/remote.test.ts
+ * Run: node --experimental-transform-types --test test/remote.test.ts
  */
 import { test } from 'node:test'
 import assert from 'node:assert/strict'

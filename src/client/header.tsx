@@ -8,11 +8,7 @@
  */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  IconPlayOutline16,
-  IconCloseOutline16,
-  IconStopFill16,
-} from '@deepseek-ai/dsh-client-ui-primitives'
+import { PlayIcon, CloseIcon, StopIcon } from './icons'
 import { quickApi } from './api'
 import { useRunPopover, openMenu, closeMenu, openRun, closeRun } from './run-state'
 import type { QuickPopupSize } from '../shared/contract'
@@ -22,6 +18,8 @@ interface WorkspaceRow {
   workspaceId: string
   path: string
   title: string
+  /** Session membership; the canonical link DSH itself resolves Workspaces by. */
+  sessionIds?: string[]
 }
 
 /** Session list state subset we read (cwd + id). */
@@ -91,7 +89,12 @@ function useCurrentWorkspace(
 ): { workspace: WorkspaceRow | undefined; cwd: string | undefined } {
   const row = useSessions?.((s) => s.byId[sessionId]) as SessionRow | undefined
   const workspaces = useWorkspaces?.((s) => s.items) as WorkspaceRow[] | undefined
-  return { workspace: matchWorkspace(row?.cwd, workspaces ?? []), cwd: row?.cwd }
+  const items = workspaces ?? []
+  // Membership first (how DSH core resolves a session's Workspace, and the only
+  // link that survives when a session runs outside the Workspace root), then
+  // the longest cwd prefix as the fallback for hosts without membership data.
+  const byMembership = items.find((ws) => ws.sessionIds?.includes(sessionId) === true)
+  return { workspace: byMembership ?? matchWorkspace(row?.cwd, items), cwd: row?.cwd }
 }
 
 /** Header icon button + command menu + live output popup. */
@@ -201,7 +204,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
         disabled={workspace === undefined}
         onClick={() => { popover.menuOpen ? closeMenu() : openMenu() }}
       >
-        <IconPlayOutline16 size={15} />
+        <PlayIcon size={15} />
       </button>
 
       {popover.menuOpen && workspace !== undefined && menuPosition !== null && createPortal(
@@ -216,7 +219,7 @@ export function QuickCommandsHeaderAction(props: HeaderProps): JSX.Element {
             {menuRemoteHost !== null && <span className="qc-menu-remote" title={`SSH · ${menuRemoteHost}`}>SSH</span>}
             <span className="qc-menu-ws">{workspace.title}</span>
             <button type="button" className="qc-menu-close" aria-label={t('runClose')} onClick={closeMenu}>
-              <IconCloseOutline16 size={12} />
+              <CloseIcon size={12} />
             </button>
           </div>
           {commands.length === 0 && (
@@ -495,7 +498,7 @@ function RunPopup(props: {
           aria-label={t('runKill')}
           onClick={() => void kill()}
         >
-          <IconStopFill16 size={14} />
+          <StopIcon size={14} />
         </button>
         <button
           type="button"
@@ -505,7 +508,7 @@ function RunPopup(props: {
           onPointerUp={onClosePointerUp}
           onClick={closeOutput}
         >
-          <IconCloseOutline16 size={14} />
+          <CloseIcon size={14} />
         </button>
       </header>
 

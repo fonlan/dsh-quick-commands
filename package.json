@@ -49,6 +49,7 @@
     "build:client": "tsdown",
     "prepare": "npm run build",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.client.json",
+    "test": "node --experimental-transform-types --test test/remote.test.ts && node test/header-icons.test.mjs",
     "bundle": "tsdown",
     "watch": "tsdown --watch",
     "release:patch": "npm version patch && git push && git push --tags",

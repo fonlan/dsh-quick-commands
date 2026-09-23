@@ -9,10 +9,7 @@
  * persist while the user types.
  */
 import { useEffect, useRef, useState } from 'react'
-import {
-  IconPlusOutline16,
-  IconTrashOutline16,
-} from '@deepseek-ai/dsh-client-ui-primitives'
+import { PlusIcon, TrashIcon } from './icons'
 import { quickApi } from './api'
 import type { QuickRosterEntry, QuickCommandsSettings } from '../shared/contract'
 import './settings-section.css'
@@ -179,12 +176,12 @@ export function QuickCommandsSettingsSection({ t }: Props): JSX.Element {
                   title={t('cardRemove')}
                   onClick={() => removeCommand(entry.workspaceId, index)}
                 >
-                  <IconTrashOutline16 size={14} />
+                  <TrashIcon size={14} />
                 </button>
               </div>
             ))}
             <button type="button" className="qc-settings-add-btn" onClick={() => addCommand(entry.workspaceId)}>
-              <IconPlusOutline16 size={14} />
+              <PlusIcon size={14} />
               {t('cardAddCommand')}
             </button>
           </section>
