@@ -32,37 +32,45 @@ export const Config = QuickCommandsSettingsSchema
 /** Configuration rides the entry config; edits persist through the settings service. */
 export function apply(ctx: Context, config: QuickCommandsSettings): void {
   const settings = registerSettings(ctx, config)
-  const subprocess = ctx.get('subprocess')
-  if (subprocess === undefined) {
-    ctx.logger?.warn?.('@fonlan/dsh-quick-commands: subprocess service unavailable; commands cannot run')
-    return
-  }
-  // Remote backend (duck-typed over @dsh-ssh/dsh-ssh): resolved lazily so the
-  // sshPool service is picked up whenever the SSH plugin loads.
-  const resolveRemote = (): RemoteBackend | undefined => {
-    const sshPool = ctx.get('sshPool') as
-      | { acquire(cfg: { id: string; [key: string]: unknown }): Promise<unknown>; release(): void }
-      | undefined
-    if (sshPool === undefined || typeof sshPool.acquire !== 'function' || typeof sshPool.release !== 'function') {
-      return undefined
+  // dsh >= 0.1.7 activates entries asynchronously: a fiber is only readable as a
+  // service once its own init settled, and the webserver's init waits for its
+  // listen. Resolving services with a one-shot `ctx.get()` during apply could
+  // therefore observe undefined with nothing to retry — the header menu's
+  // "HTTP 405": `subprocess` (and/or the route helper's own `webServer` guard)
+  // came back missing, the API prefix route was never registered, and every
+  // client POST fell through to the /plugins client-modules bundle route, which
+  // answers any non-GET with 405.
+  // ctx.inject is the retrying form: the body runs once both services are live,
+  // so the pairing also covers whichever one arrives after this entry.
+  ctx.inject(['subprocess', 'webServer'], (sctx) => {
+    const subprocess = sctx.get('subprocess')
+    // Remote backend (duck-typed over @dsh-ssh/dsh-ssh): resolved lazily so the
+    // sshPool service is picked up whenever the SSH plugin loads.
+    const resolveRemote = (): RemoteBackend | undefined => {
+      const sshPool = sctx.get('sshPool') as
+        | { acquire(cfg: { id: string; [key: string]: unknown }): Promise<unknown>; release(): void }
+        | undefined
+      if (sshPool === undefined || typeof sshPool.acquire !== 'function' || typeof sshPool.release !== 'function') {
+        return undefined
+      }
+      return {
+        pool: sshPool as never,
+        resolveHost: (hostId) => readHostConfig((ns) => {
+          try {
+            return (sctx.get('settings') as { get(ns: string): unknown } | undefined)?.get(ns)
+          } catch {
+            return undefined
+          }
+        }, hostId),
+      }
     }
-    return {
-      pool: sshPool as never,
-      resolveHost: (hostId) => readHostConfig((ns) => {
-        try {
-          return (ctx.get('settings') as { get(ns: string): unknown } | undefined)?.get(ns)
-        } catch {
-          return undefined
-        }
-      }, hostId),
-    }
-  }
-  const runner = new QuickCommandRunner(subprocess as never, () => resolveRemote())
-  ctx.effect(() => registerApiRoutes(ctx, runner, settings), 'quick-commands: api routes')
-  ctx.effect(() => () => {
-    // Terminate every live process when the plugin fiber stops.
-    for (const id of runner.listAll()) {
-      runner.kill(id)
-    }
-  }, 'quick-commands: process cleanup')
+    const runner = new QuickCommandRunner(subprocess as never, () => resolveRemote())
+    sctx.effect(() => registerApiRoutes(sctx, runner, settings), 'quick-commands: api routes')
+    sctx.effect(() => () => {
+      // Terminate every live process when the plugin fiber stops.
+      for (const id of runner.listAll()) {
+        runner.kill(id)
+      }
+    }, 'quick-commands: process cleanup')
+  })
 }

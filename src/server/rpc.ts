@@ -255,10 +255,15 @@ export function registerApiRoutes(ctx: Context, runner: QuickRunner, settings: Q
     }
   }
 
-  const webServer = ctx.get('webServer')
-  if (webServer === undefined) return () => undefined
+  // The caller reaches this function through ctx.inject(['webServer']), so the
+  // service is active by construction. A one-shot `ctx.get('webServer')` guard
+  // here used to return an empty disposer whenever the webserver fiber had not
+  // finished activating yet (dsh >= 0.1.7 activates entries asynchronously and
+  // makes a service readable only once its own init settled — for the webserver
+  // that means listening): no route was ever registered and every client POST
+  // fell through to the /plugins bundle route, which answers non-GET with 405.
   return ctx.effect(() => {
-    return webServer.register({
+    return ctx.webServer.register({
       kind: 'prefix',
       path: API_PREFIX,
       handler: async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
