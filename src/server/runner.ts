@@ -17,6 +17,7 @@
 import { randomUUID } from 'node:crypto'
 import type { SubprocessHandle, SubprocessSpawnSpec } from '@deepseek-ai/dsh-subprocess'
 import type { QuickCommandsSettings } from '../shared/contract.js'
+import { localCommandEnv } from './shell-path.js'
 import {
   localPathToRemoteRef,
   resolveRemoteCwd,
@@ -203,12 +204,15 @@ export class QuickCommandRunner implements QuickRunner {
         stdout: { maxBytes: TAIL_MAX_BYTES },
         stderr: { maxBytes: TAIL_MAX_BYTES },
       },
-      env: {
-        ...process.env,
+      // The login-shell PATH rides in front of the host's own: DSH Desktop runs
+      // the host with launchd's minimal PATH, so `npm run typecheck` and
+      // `docker compose up -d` only resolve once the user's toolchain is
+      // visible. See ./shell-path.ts.
+      env: await localCommandEnv({
         DSH_WORKSPACE: input.workspacePath,
         DSH_WORKSPACE_ID: input.workspaceId,
         DSH_WORKSPACE_TITLE: input.workspaceTitle,
-      },
+      }),
     })
 
     const live: LiveRun = {
