@@ -15,9 +15,8 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { QuickCommandRunner, type RemoteBackend } from './server/runner.js'
 import { readHostConfig } from './server/remote.js'
-import { QuickCommandsSettingsSchema, registerSettings } from './server/settings.js'
+import { QuickCommandsSettingsSchema, registerSettings, type QuickCommandsConfig } from './server/settings.js'
 import { registerApiRoutes } from './server/rpc.js'
-import type { QuickCommandsSettings } from './shared/contract.js'
 
 export const name = '@fonlan/dsh-quick-commands'
 
@@ -30,7 +29,7 @@ export const inject = ['settings']
 export const Config = QuickCommandsSettingsSchema
 
 /** Configuration rides the entry config; edits persist through the settings service. */
-export function apply(ctx: Context, config: QuickCommandsSettings): void {
+export function apply(ctx: Context, config: QuickCommandsConfig): void {
   const settings = registerSettings(ctx, config)
   // dsh >= 0.1.7 activates entries asynchronously: a fiber is only readable as a
   // service once its own init settled, and the webserver's init waits for its
